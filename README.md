@@ -1,3 +1,3 @@
-# plugin-vault
+# plugin-faucet
 
-Vault contract workflow & UI example
+Faucet contract workflow & UI example
