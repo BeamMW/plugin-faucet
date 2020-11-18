@@ -18,7 +18,7 @@
                 <div id="buttons">
                     <div id="wd-wait">
                         You've recently taken from faucet. 
-                        Wat <span id="wd-wait-time"></span> more blocks to take again.
+                        Wait <span id="wd-wait-time"></span> more blocks to take again.
                         <br><br>
                     </div>
                     <a href='' id="deposit">Deposit 5 BEAM</a>&nbsp;&nbsp;&nbsp;
@@ -28,7 +28,6 @@
                     Faucet transaction is in progress.<br>
                     You would be able to deposit/withdraw after the transaction is completed.
                 </div>
-                <br>
             </div>
         </div>
         <div class="center">
@@ -73,7 +72,7 @@
             let canWithdraw = !inTransaction && !shouldWait
 
             setStatus("Connected")
-            Utils.setText('cid', contractId)
+            Utils.setText('cid', "Contract ID: " + contractId)
             Utils.setText('withdraw-limit', withdrawLimit / 100000000)
             
             if (inTransaction) 
@@ -144,8 +143,7 @@
             Utils.callApi("user-deposit", "invoke_contract", {
                     args: ["role=my_account,action=deposit,amount=500000000,aid=0,cid=", contractId].join('')
             })
-            Utils.hide('deposit')
-            Utils.hide('withdraw')
+            Utils.hide('buttons')
             // don't refresh here, need to wait until previous contract invoke completes
             ev.preventDefault()
             return false
@@ -156,8 +154,7 @@
                 // TODO: amount
                 args: ["role=my_account,action=withdraw,amount=", withdrawLimit, "aid=0,cid=", contractId].join('')
             })
-            Utils.hide('deposit')
-            Utils.hide('withdraw')
+            Utils.hide('buttons')
             // don't refresh here, need to wait until previous contract invoke completes
             ev.preventDefault()
             return false
