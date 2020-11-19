@@ -1,0 +1,38 @@
+<body></body>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>BEAM Applications</title>
+        <link href="./css/styles.css" rel="stylesheet">
+        <link href="./css/fonts.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="center">
+            <div id="title">BEAM Faucet</div><br>
+            <div id="status">Connecting...</div>
+            <div id="error"></div><br>
+            <div class="center gray" id="cid"></div><br>
+            <div id="faucet" class="center invisible">
+                <br>
+                <div id="buttons">
+                    <div id="wd-wait">
+                        You've recently taken from faucet. 
+                        Wait <span id="wd-wait-time"></span> more blocks to take again.
+                        <br><br>
+                    </div>
+                    <a href='' id="deposit">Deposit 5 BEAM</a>&nbsp;&nbsp;&nbsp;
+                    <a href='' id="withdraw">Withdraw <span id="withdraw-limit"></span> BEAM</a>
+                </div>
+                <div id="intx">
+                    Faucet transaction is in progress.<br>
+                    You would be able to deposit/withdraw after the transaction is completed.
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src='./scripts/big.js'></script>
+    <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js" async></script>
+    <script type="module" async src="./scripts/index.js"></script>
+</html>
+</body>

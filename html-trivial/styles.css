@@ -1,5 +1,5 @@
 body {
-    font-family: "Proxima Nova Regular";
+    font-family: 'SFProDisplay', sans-serif;
     font-weight: normal;
 }
 
@@ -24,7 +24,6 @@ body {
 }
 
 #title {
-    font-family: "Proxima Nova Thin";    
     font-size: 38px;
 }
 
