@@ -9,8 +9,12 @@ body {
 
 /* plugin area start  */
 
+#wd-wait, #intx {
+    margin-top: 1.2em;
+}
+
 #wd-wait-time {
-    margin: 0 5px;
+    margin: 0 5;
 }
 
 .container {

@@ -113,9 +113,9 @@ class Faucet {
             if (apiCallId == "manager-view")
             {
                 let shaderOut = this.parseShaderResult(apiResult)
-                if (shaderOut.Cids) {
-                    for (let idx = 0; idx < shaderOut.Cids.length; ++idx) {
-                        let cid = shaderOut.Cids[idx]
+                if (shaderOut.contracts) {
+                    for (let idx = 0; idx < shaderOut.contracts.length; ++idx) {
+                        let cid = shaderOut.contracts[idx].cid
                         if (cid == "c327a42e9037d060b8158d635990a53ea4cde2e217ed70eb5faf93cac22e4771") {
                             this.pluginData.contractId = cid;
                             break
