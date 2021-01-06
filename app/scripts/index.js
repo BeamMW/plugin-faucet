@@ -116,7 +116,7 @@ class Faucet {
                 if (shaderOut.contracts) {
                     for (let idx = 0; idx < shaderOut.contracts.length; ++idx) {
                         let cid = shaderOut.contracts[idx].cid
-                        if (cid == "c327a42e9037d060b8158d635990a53ea4cde2e217ed70eb5faf93cac22e4771") {
+                        if (cid == "6add645863c29d9dc43ab9987af870cb91fd0dfb4e26ae09ca97ac8ff5372f6e") {
                             this.pluginData.contractId = cid;
                             break
                         }
