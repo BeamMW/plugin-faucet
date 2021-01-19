@@ -23,7 +23,10 @@ export default class Utils {
             ].join(' ')
             document.body.style.color = Utils.BEAM.style.content_main
             document.querySelectorAll('.popup').forEach(item => {
-                item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6);
+                item.style.backgroundImage = `linear-gradient(to bottom, 
+                    ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
+                    ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
+                    ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
             });
             document.querySelectorAll('.popup__content').forEach(item => {
                 item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);

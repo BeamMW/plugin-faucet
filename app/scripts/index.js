@@ -23,7 +23,7 @@ class Faucet {
         }
         this.timeout = setTimeout(() => {
             Utils.setText('error', "")
-            this.start()
+            this.start();
         }, 3000);
     }
 
@@ -241,6 +241,31 @@ Utils.onLoad(async (beamAPI) => {
     Utils.getById('cancel-button-popup-dep').addEventListener('click', (ev) => {
         Utils.hide('deposit-popup');
     });
+
+    Utils.getById('deposit-input').addEventListener('keydown', (event) => {
+        const specialKeys = [
+            'Backspace', 'Tab', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp',
+            'Control', 'Delete', 'F5'
+          ];
+
+        if (specialKeys.indexOf(event.key) !== -1) {
+            return;
+        }
+
+        const current = Utils.getById('deposit-input').value;
+        const next = current.concat(event.key);
+      
+        if (!Utils.handleString(next)) {
+            event.preventDefault();
+        }
+    })
+
+    Utils.getById('deposit-input').addEventListener('paste', (event) => {
+        const text = event.clipboardData.getData('text');
+        if (!Utils.handleString(text)) {
+            event.preventDefault();
+        }
+    })
 
     Utils.getById('deposit-button-popup').addEventListener('click', (ev) => {
         const bigValue = new Big(Utils.getById('deposit-input').value);
