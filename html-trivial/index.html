@@ -91,7 +91,7 @@
         Utils.onLoad(async (beamAPI) => {
            BEAM = beamAPI
            Utils.byId('error').style.color = BEAM.style.validator_error
-           BEAM.callWalletApiResult.connect(onApiResult)
+           BEAM.api.callWalletApiResult.connect(onApiResult)
            start()
         })
 
@@ -180,7 +180,7 @@
                     if (shaderOut.contracts) {
                     for (var idx = 0; idx < shaderOut.contracts.length; ++idx) {
                         const cid = shaderOut.contracts[idx].cid
-                            if (cid == "6add645863c29d9dc43ab9987af870cb91fd0dfb4e26ae09ca97ac8ff5372f6e") {
+                            if (cid == "50ab294a5ff6cedcfd74860898faf3f00967b9f1296c94f19dec24f2ab55595f") {
                                 contractId = cid
                                 break
                             }

@@ -116,7 +116,7 @@ class Faucet {
                 if (shaderOut.contracts) {
                     for (let idx = 0; idx < shaderOut.contracts.length; ++idx) {
                         let cid = shaderOut.contracts[idx].cid
-                        if (cid == "6add645863c29d9dc43ab9987af870cb91fd0dfb4e26ae09ca97ac8ff5372f6e") {
+                        if (cid == "50ab294a5ff6cedcfd74860898faf3f00967b9f1296c94f19dec24f2ab55595f") {
                             this.pluginData.contractId = cid;
                             break
                         }
@@ -223,7 +223,7 @@ class Faucet {
 Utils.onLoad(async (beamAPI) => {
     let faucet = new Faucet();
     Utils.getById('error').style.color = beamAPI.style.validator_error;
-    beamAPI.callWalletApiResult.connect(faucet.onApiResult);
+    beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
     faucet.start();
 
     Utils.getById('deposit').addEventListener('click', (ev) => {
