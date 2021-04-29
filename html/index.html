@@ -8,19 +8,25 @@
         <link href="./css/fonts.css" rel="stylesheet">
     </head>
     <body>
+        <div class="error-container hidden" id="error-full-container">
+            <div id="error-full"></div>
+        </div>
+        <div id="error-common"></div>
         <div class="container hidden" id="faucet">
+            <div class="container__cards">
+                <div class="container__cards__top__vault card">
+                    <img class="card-icon" src="./icons/icon-deposited.svg"/>
+                    <span class="card-title">IN FAUCET</span>
+                    <span class="card-beam-value">
+                        <span id="in-vault"></span> BEAM
+                    </span>
+                </div>
+            </div>
             <div class="container__main" id="faucet-main">
                 <div class="container__main__empty-deposit main-text">
                     <div>Welcome to faucet!</div>
                     <div id="intx">
-                        Faucet transaction is in progress.<br>
-                        You would be able to deposit/withdraw after the transaction is completed.
-                    </div>
-
-                    <div id="wd-wait">
-                        You've recently taken from faucet. 
-                        Wait <span id="wd-wait-time"></span> more blocks to take again.
-                        <br><br>
+                        Faucet transaction is in progress.
                     </div>
                 </div>
 
@@ -48,7 +54,6 @@
             <div class="container__update">
                 <div class="container__update__contract" id="cid"></div>
             </div>
-            <div id="error"></div><br>
         </div>
 
         <div class="hidden" id="withdraw-popup">

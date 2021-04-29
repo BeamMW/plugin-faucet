@@ -1,30 +1,43 @@
 import Utils from "./utils.js"
 
+const TIMEOUT = 3000;
 const GROTHS_IN_BEAM = 100000000;
+const REJECTED_CALL_ID = -32021;
+const IN_PROGRESS_ID = 5;
+const CONTRACT_ID = "93c9c180ea80face345bb5921a451ac68ab5d6875081fe224c060ac24bf80604";
 
 class Faucet {
     constructor() {
         this.timeout = undefined;
         this.pluginData = {
             contractId: undefined,
-            inTransaction: false,
+            inProgress: false,
+            isWithdraw: null,
             backlogPeriod: undefined,
             withdrawLimit: undefined,
             withdrawHeight: 0,
-            currHeight: 0,
+            total: 0,
+            bytes: null
         }
     }
 
     setError = (errmsg) => {
-        Utils.hide('faucet')
-        Utils.setText('error', errmsg)
+        let errorElementId = "error-common";
+        if (document.getElementById('faucet').classList.contains('hidden')) {
+            errorElementId = "error-full";
+            Utils.show('error-full-container');
+        } else {
+            Utils.show('error-common');
+        }
+
+        Utils.setText(errorElementId, errmsg)
         if (this.timeout) {
-            clearTimeout(this.timeout)   
+            clearTimeout(this.timeout);   
         }
         this.timeout = setTimeout(() => {
-            Utils.setText('error', "")
+            Utils.setText(errorElementId, errmsg)
             this.start();
-        }, 3000);
+        }, TIMEOUT)
     }
 
     start = () => {
@@ -34,9 +47,11 @@ class Faucet {
                 let errMsg = [errTemplate, err].join(" ");
                 return this.setError(errMsg);
             }
+            this.pluginData.bytes = bytes;
     
             Utils.callApi("manager-view", "invoke_contract", {
                 contract: bytes,
+                create_tx: false,
                 args: "role=manager,action=view"
             })
         })
@@ -48,6 +63,7 @@ class Faucet {
         }
         this.timeout = setTimeout(() => {
             Utils.callApi("user-view", "invoke_contract", {
+                create_tx: false,
                 args: ["role=my_account,action=view,cid=", this.pluginData.contractId].join("")
             })
         }, now ? 0 : 3000)
@@ -66,33 +82,33 @@ class Faucet {
         return shaderOut
     }
 
+    loadTotal = () => {
+        Utils.callApi("view_funds", "invoke_contract", {
+            contract: this.pluginData.bytes,
+            create_tx: false,
+            args: ["role=manager,action=view_funds,cid=", this.pluginData.contractId].join("")
+        })
+    }
+
     showFaucet = () => {
-        const shouldWait  = this.pluginData.withdrawHeight ? this.pluginData.withdrawHeight 
-            + this.pluginData.backlogPeriod > this.pluginData.currHeight : false;
-        const canWithdraw = !this.pluginData.inTransaction && !shouldWait;
+        const canWithdraw = !this.pluginData.inProgress && this.pluginData.total > 0;
     
         Utils.setText('cid', "Contract ID: " + this.pluginData.contractId);
-        Utils.setText('withdraw-limit', this.pluginData.withdrawLimit / 100000000);
+        Utils.setText('withdraw-limit', this.pluginData.withdrawLimit / GROTHS_IN_BEAM);
         
-        if (this.pluginData.inTransaction) {
-            Utils.hide('buttons');
+        if (this.pluginData.inProgress) {
+            Utils.hide('withdraw');
             Utils.show('intx');
-            Utils.hide('wd-wait');
         } else {
             Utils.show('buttons');
             Utils.hide('intx');
             
             canWithdraw ? Utils.show('withdraw') : Utils.hide('withdraw');
-            
-            const waitFor = this.pluginData.withdrawHeight + this.pluginData.backlogPeriod - this.pluginData.currHeight;
-            if (waitFor > 0) {
-                shouldWait ? Utils.show('wd-wait') : Utils.hide('wd-wait');
-                Utils.setText('wd-wait-time', ' ' + waitFor + ' ');
-            } else {
-                Utils.hide('wd-wait');
-            }
         }
+        this.loadTotal();
     
+        Utils.hide('error-full-container');
+        Utils.hide('error-common');
         Utils.show('faucet');
         this.refresh(false);
     }
@@ -101,6 +117,9 @@ class Faucet {
         try {
             const apiAnswer = JSON.parse(json);
             if (apiAnswer.error) {
+                if (apiAnswer.error.code == REJECTED_CALL_ID) {
+                    return;
+                }
                 throw JSON.stringify(apiAnswer.error)
             }
     
@@ -110,13 +129,12 @@ class Faucet {
                 throw "Failed to call wallet API"
             }
     
-            if (apiCallId == "manager-view")
-            {
+            if (apiCallId == "manager-view") {
                 let shaderOut = this.parseShaderResult(apiResult)
                 if (shaderOut.contracts) {
                     for (let idx = 0; idx < shaderOut.contracts.length; ++idx) {
                         let cid = shaderOut.contracts[idx].cid
-                        if (cid == "50ab294a5ff6cedcfd74860898faf3f00967b9f1296c94f19dec24f2ab55595f") {
+                        if (cid == CONTRACT_ID) {
                             this.pluginData.contractId = cid;
                             break
                         }
@@ -128,6 +146,7 @@ class Faucet {
                 }
 
                 Utils.callApi("manager-params", "invoke_contract", {
+                    create_tx: false,
                     args: ["role=manager,action=view_params,cid=", this.pluginData.contractId].join('')
                 })
     
@@ -157,60 +176,66 @@ class Faucet {
                 } else {
                     this.pluginData.withdrawHeight = 0;
                 }
-    
-                Utils.callApi("wallet-status", "wallet_status", {})
-                return
-            }
-    
-            if (apiCallId == "wallet-status") {
-                if (!apiResult.current_height) {
-                    throw "Failed to get wallet status"
-                }
-    
-                this.pluginData.currHeight = apiResult.current_height
+
                 Utils.callApi("tx-list", "tx_list", {})
                 return
             }
-    
+
             if (apiCallId == "tx-list") {
                 if (!Array.isArray(apiResult)) {
-                    throw ("Failed to get transactions list")
+                    throw "Failed to get transactions list";
                 }
-    
-                let ourActiveTx = (tx) => {
-                    if (tx["tx_type_string"] == "contract") {
-                        let ivdata = tx["invoke_data"]
-                        for (let idx = 0; idx < ivdata.length; ++idx) {
-                            if (ivdata[idx]["contract_id"] == this.pluginData.contractId) {
-                                let status = tx["status"]
-                                if (status == 2 || status == 3 || status == 4) {
-                                    // cancelled, completed, failed
-                                    continue
+
+                for (let element of apiResult) {
+                    if (element["tx_type_string"] == "contract") {
+                        const ivdata = element["invoke_data"];
+                        let isProgressDetected = false;
+                        for (let data of ivdata) {
+                            if (data["contract_id"] == this.pluginData.contractId) {
+                                const status = element["status"]
+                                if (status === IN_PROGRESS_ID) {
+                                    isProgressDetected = true;
+                                    break;
                                 }
-                                return true
                             }
+                        };
+
+                        if (isProgressDetected) {
+                            this.pluginData.inProgress = true;
+                            this.pluginData.isWithdraw = element["comment"] === "withdraw from Faucet"; 
+                            break;
+                        } else {
+                            this.pluginData.inProgress = false;
+                            this.pluginData.isWithdraw = null;
                         }
                     }
-                    return false
-                }
-    
-                this.pluginData.inTransaction = false
-                for (let idx = 0; idx < apiResult.length; ++idx) {
-                    if (ourActiveTx(apiResult[idx])) {
-                        this.pluginData.inTransaction = true
-                        break
-                    }
-                }
-                    
-                return this.showFaucet()
+                };
+                return this.showFaucet();
             }
-    
-            if (apiCallId == "user-deposit") {
-                return this.refresh(true)
+
+            if (apiCallId == "view_funds") {
+                let shaderOut = this.parseShaderResult(apiResult);
+
+                if (shaderOut.funds === undefined) {
+                    throw 'Failed to load funds';
+                }
+
+                this.pluginData.total = shaderOut.funds.length > 0 ? 
+                    shaderOut.funds[0]['Amount'] / GROTHS_IN_BEAM : 0;
+                Utils.setText('in-vault', this.pluginData.total)
             }
-    
-            if (apiCallId == "user-withdraw") {
-                return this.refresh(true)
+
+            if (apiCallId == "user-deposit" || apiCallId == "user-withdraw") {
+                if (apiResult.raw_data === undefined || apiResult.raw_data.length < 1) {
+                    throw 'Failed to load raw data';
+                }
+
+                Utils.callApi("process_invoke_data", "process_invoke_data", {
+                    data: apiResult.raw_data
+                });
+                return this.refresh(true);
+            }  else if (apiCallId == "process_invoke_data") {
+                return this.refresh(true);
             }
         }
         catch(err) 
@@ -222,7 +247,6 @@ class Faucet {
 
 Utils.onLoad(async (beamAPI) => {
     let faucet = new Faucet();
-    Utils.getById('error').style.color = beamAPI.style.validator_error;
     beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
     faucet.start();
 
@@ -271,18 +295,19 @@ Utils.onLoad(async (beamAPI) => {
         const bigValue = new Big(Utils.getById('deposit-input').value);
         const value = bigValue.times(GROTHS_IN_BEAM);
         Utils.callApi("user-deposit", "invoke_contract", {
+            create_tx: false,
             args: `role=my_account,action=deposit,amount=${parseInt(value)},aid=0,cid=${faucet.pluginData.contractId}`
         });
+        
         Utils.hide('buttons');
         Utils.hide('deposit-popup');
-        // don't refresh here, need to wait until previous contract invoke completes
         ev.preventDefault();
         return false;
     });
 
     Utils.getById('withdraw-button-popup').addEventListener('click', (ev) => {
         Utils.callApi("user-withdraw", "invoke_contract", {
-            // TODO: amount
+            create_tx: false,
             args: ["role=my_account,action=withdraw,amount=", faucet.pluginData.withdrawLimit, "aid=0,cid=", faucet.pluginData.contractId].join('')
         })
         Utils.hide('buttons');
@@ -292,3 +317,4 @@ Utils.onLoad(async (beamAPI) => {
         return false
     });
 });
+
