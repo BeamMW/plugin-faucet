@@ -62,10 +62,7 @@ class Faucet {
             clearTimeout(this.timeout);
         }
         this.timeout = setTimeout(() => {
-            Utils.callApi("user-view", "invoke_contract", {
-                create_tx: false,
-                args: ["role=my_account,action=view,cid=", this.pluginData.contractId].join("")
-            })
+            this.loadTotal();
         }, now ? 0 : 3000)
     }
     
@@ -97,7 +94,7 @@ class Faucet {
         Utils.setText('withdraw-limit', this.pluginData.withdrawLimit / GROTHS_IN_BEAM);
         
         if (this.pluginData.inProgress) {
-            Utils.hide('withdraw');
+            Utils.hide('buttons');
             Utils.show('intx');
         } else {
             Utils.show('buttons');
@@ -105,7 +102,6 @@ class Faucet {
             
             canWithdraw ? Utils.show('withdraw') : Utils.hide('withdraw');
         }
-        this.loadTotal();
     
         Utils.hide('error-full-container');
         Utils.hide('error-common');
@@ -186,6 +182,9 @@ class Faucet {
                     throw "Failed to get transactions list";
                 }
 
+                this.pluginData.inProgress = false;
+                this.pluginData.isWithdraw = null;
+
                 for (let element of apiResult) {
                     if (element["tx_type_string"] == "contract") {
                         const ivdata = element["invoke_data"];
@@ -204,9 +203,6 @@ class Faucet {
                             this.pluginData.inProgress = true;
                             this.pluginData.isWithdraw = element["comment"] === "withdraw from Faucet"; 
                             break;
-                        } else {
-                            this.pluginData.inProgress = false;
-                            this.pluginData.isWithdraw = null;
                         }
                     }
                 };
@@ -222,7 +218,12 @@ class Faucet {
 
                 this.pluginData.total = shaderOut.funds.length > 0 ? 
                     shaderOut.funds[0]['Amount'] / GROTHS_IN_BEAM : 0;
-                Utils.setText('in-vault', this.pluginData.total)
+                Utils.setText('in-vault', this.pluginData.total);
+                
+                Utils.callApi("user-view", "invoke_contract", {
+                    create_tx: false,
+                    args: ["role=my_account,action=view,cid=", this.pluginData.contractId].join("")
+                })
             }
 
             if (apiCallId == "user-deposit" || apiCallId == "user-withdraw") {
