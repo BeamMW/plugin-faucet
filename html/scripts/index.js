@@ -4,7 +4,7 @@ const TIMEOUT = 3000;
 const GROTHS_IN_BEAM = 100000000;
 const REJECTED_CALL_ID = -32021;
 const IN_PROGRESS_ID = 5;
-const CONTRACT_ID = "93c9c180ea80face345bb5921a451ac68ab5d6875081fe224c060ac24bf80604";
+const CONTRACT_ID = "50ab294a5ff6cedcfd74860898faf3f00967b9f1296c94f19dec24f2ab55595f";
 
 class Faucet {
     constructor() {
