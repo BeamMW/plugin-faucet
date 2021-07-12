@@ -294,14 +294,7 @@ Utils.onLoad(async (beamAPI) => {
 
     Utils.getById('deposit-input').oninput = function() {
         const inputValue = Utils.getById('deposit-input').value
-        if(inputValue === '') {
-            Utils.getById('deposit-button-popup').classList.add("disabled")
-      }
-            else if(inputValue > 100) {
-                Utils.getById('deposit-button-popup').classList.add("disabled")
-          }
-          else if(inputValue === '0' || inputValue === '0.' )
-          {
+        if(inputValue === '' || inputValue === '0' || inputValue === '0.'  || inputValue > 100) {
             Utils.getById('deposit-button-popup').classList.add("disabled")
       }
          else (Utils.getById('deposit-button-popup').classList.remove("disabled"))
