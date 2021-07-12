@@ -275,6 +275,10 @@ body {
     background-color: #da68f5;
     margin-left: 20px;
 }
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
 
 .container__cards {
     display: flex;
