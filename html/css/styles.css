@@ -3,6 +3,8 @@
 body {
     font-family: 'SFProDisplay', sans-serif;
     font-weight: normal;
+    height: 100%;
+    overflow: hidden;
 }
 
 /* common ends */

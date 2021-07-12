@@ -18,12 +18,7 @@ export default class Utils {
             // Make everything beautiful
             let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
             let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
-            document.body.style.backgroundImage = [
-                "linear-gradient(to bottom,",
-                Utils.BEAM.style.background_main_top, topColor, 
-                Utils.BEAM.style.background_main, mainColor,
-                Utils.BEAM.style.background_main
-            ].join(' ')
+           
             document.body.style.color = Utils.BEAM.style.content_main
             document.querySelectorAll('.popup').forEach(item => {
                 item.style.backgroundImage = `linear-gradient(to bottom, 
