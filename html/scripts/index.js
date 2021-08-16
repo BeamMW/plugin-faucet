@@ -317,8 +317,8 @@ function appStart(faucet) {
     });
 }
 
-if (window.beam !== undefined) {
-    window.addEventListener('load', () => {
+window.addEventListener('load', () => {
+    if (window.beam !== undefined) {   
         let faucet = new Faucet();
         window.beam.initializeShader(CONTRACT_ID, 'faucet');
         window.beam.apiResult$.subscribe(faucet.onApiResult);
@@ -326,12 +326,12 @@ if (window.beam !== undefined) {
         document.getElementById('faucet').style.backgroundColor = 'rgba(0,0,0,.8)';
         
         appStart(faucet);
-    });
-} else {
-    Utils.onLoad(async (beamAPI) => {
-        let faucet = new Faucet();
-        beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
-        appStart(faucet);
-    });
-}
+    } else {
+        Utils.onLoad(async (beamAPI) => {
+            let faucet = new Faucet();
+            beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
+            appStart(faucet);
+        });
+    }
+});
 
