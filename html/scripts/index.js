@@ -246,9 +246,7 @@ class Faucet {
     }
 }
 
-Utils.onLoad(async (beamAPI) => {
-    let faucet = new Faucet();
-    beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
+function appStart(faucet) {
     faucet.start();
 
     Utils.getById('deposit').addEventListener('click', (ev) => {
@@ -325,5 +323,23 @@ Utils.onLoad(async (beamAPI) => {
         ev.preventDefault()
         return false
     });
+}
+
+window.addEventListener('load', () => {
+    if (window.beam !== undefined) {   
+        let faucet = new Faucet();
+        window.beam.initializeShader(CONTRACT_ID, 'faucet');
+        window.beam.apiResult$.subscribe(faucet.onApiResult);
+        document.getElementById('faucet').style.height = '100%';
+        document.getElementById('faucet').style.backgroundColor = 'rgba(0,0,0,.8)';
+        
+        appStart(faucet);
+    } else {
+        Utils.onLoad(async (beamAPI) => {
+            let faucet = new Faucet();
+            beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
+            appStart(faucet);
+        });
+    }
 });
 
