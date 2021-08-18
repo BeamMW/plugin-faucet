@@ -12,7 +12,7 @@ export default class Utils {
     static BEAM = null
 
     static onLoad(cback) {
-        window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
+        new QWebChannel(qt.webChannelTransport, (channel) => {
             Utils.BEAM = channel.objects.BEAM
 
             // Make everything beautiful
@@ -34,7 +34,7 @@ export default class Utils {
             
             // Notify application
             cback(Utils.BEAM)
-        }))
+        })
     }
 
     static hex2rgba = (hex, alpha = 1) => {
