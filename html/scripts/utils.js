@@ -24,6 +24,8 @@ export default class Utils {
             let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
             let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
                                 
+            document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />'
+
             document.body.classList.add('mobile');
             document.body.style.color = Utils.BEAM.style.content_main;
             document.body.style.backgroundImage = [
