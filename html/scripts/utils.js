@@ -19,64 +19,59 @@ export default class Utils {
     static onLoad(cback) {
         if (Utils.isMobile()) {
 
-            Utils.BEAM = window.BEAM;
+            Utils.BEAM = window.BEAM
             
-            let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
-            let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
-                                
-            document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />'
-
-            document.body.classList.add('mobile');
-            document.body.style.color = Utils.BEAM.style.content_main;
-            document.body.style.backgroundImage = [
-                                                   "linear-gradient(to bottom,",
-                                                   Utils.BEAM.style.background_main_top, topColor,
-                                                   Utils.BEAM.style.background_main, mainColor,
-                                                   Utils.BEAM.style.background_main
-                                                   ].join(' ')
+            // Make everything beautiful
             
-                        
-                        
-            document.querySelectorAll('.popup').forEach(item => {
-                item.style.backgroundImage = `linear-gradient(to bottom,
-                ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
-                ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
-                ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
-            });
+            Utils.applyStyles()
             
-            document.querySelectorAll('.popup__content').forEach(item => {
-                item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);
-            });
-            document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
-            document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
-                        
-            cback(Utils.BEAM);
+            cback(Utils.BEAM)
         }
         else {
             window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
                 Utils.BEAM = channel.objects.BEAM
                 
                 // Make everything beautiful
-                let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
-                let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
-                
-                document.body.style.color = Utils.BEAM.style.content_main
-                document.querySelectorAll('.popup').forEach(item => {
-                    item.style.backgroundImage = `linear-gradient(to bottom,
-                    ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
-                    ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
-                    ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
-                });
-                document.querySelectorAll('.popup__content').forEach(item => {
-                    item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);
-                });
-                document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
-                document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
+                Utils.applyStyles()
                 
                 // Notify application
                 cback(Utils.BEAM)
             }))
         }
+    }
+    
+    static applyStyles() {
+        let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
+        let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
+     
+        if (Utils.isMobile()) {
+            document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />'
+            
+            document.body.classList.add('mobile')
+            
+            document.body.style.backgroundImage = [
+                                                   "linear-gradient(to bottom,",
+                                                   Utils.BEAM.style.background_main_top, topColor,
+                                                   Utils.BEAM.style.background_main, mainColor,
+                                                   Utils.BEAM.style.background_main
+                                                   ].join(' ')
+        }
+        
+        
+        document.body.style.color = Utils.BEAM.style.content_main
+        document.querySelectorAll('.popup').forEach(item => {
+            item.style.backgroundImage = `linear-gradient(to bottom,
+            ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
+            ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
+            ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
+        });
+        
+        document.querySelectorAll('.popup__content').forEach(item => {
+            item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);
+        });
+        document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
+        document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
+        
     }
 
     static hex2rgba = (hex, alpha = 1) => {
