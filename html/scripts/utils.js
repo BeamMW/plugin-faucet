@@ -26,7 +26,7 @@ export default class Utils {
             Utils.applyStyles()
             
             cback(Utils.BEAM)
-        }
+    }
         else {
             window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
                 Utils.BEAM = channel.objects.BEAM
@@ -71,7 +71,6 @@ export default class Utils {
         });
         document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
         document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
-        
     }
 
     static hex2rgba = (hex, alpha = 1) => {
