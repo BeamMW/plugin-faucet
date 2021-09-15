@@ -336,6 +336,12 @@ body {
 
 
 /* MOBILE */
+
+.mobile .container {
+    margin: 0;
+    width: unset;
+}
+
 .mobile .popup__content__middle-deposit {
     margin-bottom: 15px;
 }
