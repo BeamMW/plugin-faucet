@@ -109,7 +109,8 @@ class Faucet {
         this.refresh(false);
     }
 
-    onApiResult = (json) => {    
+    onApiResult = (json) => {
+
         try {
             const apiAnswer = JSON.parse(json);
             if (apiAnswer.error) {
@@ -317,9 +318,8 @@ function appStart(faucet) {
     });
 }
 
-window.addEventListener( "load", () => {    
-    if (window.beam !== undefined) {   
-        const faucet = new Faucet();
+ if (window.beam !== undefined) {
+        let faucet = new Faucet();
         window.beam.initializeShader(CONTRACT_ID, 'faucet');
         window.beam.apiResult$.subscribe(faucet.onApiResult);
         document.getElementById('faucet').style.height = '100%';
@@ -328,10 +328,15 @@ window.addEventListener( "load", () => {
         document.body.style.backgroundColor = 'rgb(50, 50, 50)';  
         
         appStart(faucet);
-    } else {
+    } else {        
         Utils.onLoad(async (beamAPI) => {
-            const faucet = new Faucet();
-            beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
+let faucet = new Faucet();
+            if (Utils.isMobile()) {
+                beamAPI.callWalletApiResult(faucet.onApiResult);
+            }
+            else {
+                beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
+            }
             appStart(faucet);
         });
     }

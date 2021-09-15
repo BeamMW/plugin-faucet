@@ -6,35 +6,71 @@ export default class Utils {
         window.location.reload()
     }
 
+    static isMobile = () => {
+        const ua = navigator.userAgent
+        return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua))
+    }
+    
     //
     // API Exposed by the wallet itself
     //
     static BEAM = null
 
     static onLoad(cback) {
-        new QWebChannel(qt.webChannelTransport, (channel) => {
-            Utils.BEAM = channel.objects.BEAM
+        if (Utils.isMobile()) {
 
-            // Make everything beautiful
-            let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
-            let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
-           
-            document.body.style.color = Utils.BEAM.style.content_main
-            document.querySelectorAll('.popup').forEach(item => {
-                item.style.backgroundImage = `linear-gradient(to bottom, 
-                    ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
-                    ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
-                    ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
-            });
-            document.querySelectorAll('.popup__content').forEach(item => {
-                item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);
-            });
-            document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
-            document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
+            Utils.BEAM = window.BEAM
             
-            // Notify application
+            // Make everything beautiful
+            
+            Utils.applyStyles()
+            
             cback(Utils.BEAM)
-        })
+    }
+        else {
+            window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
+                Utils.BEAM = channel.objects.BEAM
+                
+                // Make everything beautiful
+                Utils.applyStyles()
+                
+                // Notify application
+                cback(Utils.BEAM)
+            }))
+        }
+    }
+    
+    static applyStyles() {
+        let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
+        let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
+     
+        if (Utils.isMobile()) {
+            document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />'
+            
+            document.body.classList.add('mobile')
+            
+            document.body.style.backgroundImage = [
+                                                   "linear-gradient(to bottom,",
+                                                   Utils.BEAM.style.background_main_top, topColor,
+                                                   Utils.BEAM.style.background_main, mainColor,
+                                                   Utils.BEAM.style.background_main
+                                                   ].join(' ')
+        }
+        
+        
+        document.body.style.color = Utils.BEAM.style.content_main
+        document.querySelectorAll('.popup').forEach(item => {
+            item.style.backgroundImage = `linear-gradient(to bottom,
+            ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
+            ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
+            ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
+        });
+        
+        document.querySelectorAll('.popup__content').forEach(item => {
+            item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);
+        });
+        document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
+        document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
     }
 
     static hex2rgba = (hex, alpha = 1) => {
@@ -65,10 +101,16 @@ export default class Utils {
             "method":  method,
             "params":  params
         }
+        
         if (window.beam !== undefined) {
             window.beam.callApi(callid, method, params);
         } else {
-            Utils.BEAM.api.callWalletApi(JSON.stringify(request))
+            if (Utils.isMobile()) {
+                Utils.BEAM.callWalletApi(JSON.stringify(request))
+            }
+            else {
+                Utils.BEAM.api.callWalletApi(JSON.stringify(request))
+            }
         }
     }
 
