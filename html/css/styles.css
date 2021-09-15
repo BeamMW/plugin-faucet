@@ -327,3 +327,37 @@ body {
 }
 
 /* popup ends */
+
+
+/* MOBILE */
+.mobile .popup__content__middle-deposit {
+    margin-bottom: 15px;
+}
+
+.mobile .deposit-popup-input {
+    width: 100%;
+}
+
+.mobile .popup {
+    margin: -3%;
+}
+
+.mobile .popup .popup__content {
+    margin: -120px auto 0px auto;
+    width: 80%;
+    height: 139px;
+}
+
+.mobile .container__update__contract {
+    width: 100%;
+    word-break: break-all;
+    margin-right: 10px;
+}
+
+.mobile .container__update {
+    width:100%;
+}
+
+body.mobile {
+    margin: 3% !important;
+}
