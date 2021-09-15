@@ -291,6 +291,14 @@ function appStart(faucet) {
         }
     })
 
+    Utils.getById('deposit-input').oninput = function() {
+        const inputValue = Utils.getById('deposit-input').value
+        if(inputValue === '' || inputValue === '0' || inputValue === '0.'  || inputValue > 100) {
+            Utils.getById('deposit-button-popup').classList.add("disabled")
+      }
+         else (Utils.getById('deposit-button-popup').classList.remove("disabled"))
+      };
+
     Utils.getById('deposit-button-popup').addEventListener('click', (ev) => {
         const bigValue = new Big(Utils.getById('deposit-input').value);
         const value = bigValue.times(GROTHS_IN_BEAM);
