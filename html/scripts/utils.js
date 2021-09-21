@@ -11,18 +11,29 @@ export default class Utils {
         return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua))
     }
     
+    static isAndroid = () => {
+        const ua = navigator.userAgent
+        return (/android/i.test(ua))
+    }
+    
     //
     // API Exposed by the wallet itself
     //
     static BEAM = null
-
+    
+    //for android
+    static onCallWalletApiResult(cbak){
+        document.addEventListener("onCallWalletApiResult", function(e) {
+            cbak(e)
+        });
+    }
+    
     static onLoad(cback) {
+        
         if (Utils.isMobile()) {
-
             Utils.BEAM = window.BEAM
             
             // Make everything beautiful
-            
             Utils.applyStyles()
             
             cback(Utils.BEAM)
@@ -41,9 +52,11 @@ export default class Utils {
     }
     
     static applyStyles() {
-        let topColor =  [Utils.BEAM.style.appsGradientOffset, "px,"].join('')
-        let mainColor = [Utils.BEAM.style.appsGradientTop, "px,"].join('')
-     
+        let style = Utils.BEAM.style
+        
+        let topColor =  [style.appsGradientOffset, "px,"].join('')
+        let mainColor = [style.appsGradientTop, "px,"].join('')
+
         if (Utils.isMobile()) {
             document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />'
             
@@ -51,26 +64,26 @@ export default class Utils {
             
             document.body.style.backgroundImage = [
                                                    "linear-gradient(to bottom,",
-                                                   Utils.BEAM.style.background_main_top, topColor,
-                                                   Utils.BEAM.style.background_main, mainColor,
-                                                   Utils.BEAM.style.background_main
+                                                   style.background_main_top, topColor,
+                                                   style.background_main, mainColor,
+                                                   style.background_main
                                                    ].join(' ')
         }
         
         
-        document.body.style.color = Utils.BEAM.style.content_main
+        document.body.style.color = style.content_main
         document.querySelectorAll('.popup').forEach(item => {
             item.style.backgroundImage = `linear-gradient(to bottom,
-            ${Utils.hex2rgba(Utils.BEAM.style.background_main_top, 0.6)} ${topColor}
-            ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)} ${mainColor}
-            ${Utils.hex2rgba(Utils.BEAM.style.background_main, 0.6)}`;
+            ${Utils.hex2rgba(style.background_main_top, 0.6)} ${topColor}
+            ${Utils.hex2rgba(style.background_main, 0.6)} ${mainColor}
+            ${Utils.hex2rgba(style.background_main, 0.6)}`;
         });
         
         document.querySelectorAll('.popup__content').forEach(item => {
-            item.style.backgroundColor = Utils.hex2rgba(Utils.BEAM.style.background_popup, 1);
+            item.style.backgroundColor = Utils.hex2rgba(style.background_popup, 1);
         });
-        document.getElementById('error-full').style.color = Utils.BEAM.style.validator_error;
-        document.getElementById('error-common').style.color = Utils.BEAM.style.validator_error;
+        document.getElementById('error-full').style.color = style.validator_error;
+        document.getElementById('error-common').style.color = style.validator_error;
         
     }
 

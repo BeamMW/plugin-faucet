@@ -110,7 +110,7 @@ class Faucet {
     }
 
     onApiResult = (json) => {
-
+        
         try {
             const apiAnswer = JSON.parse(json);
             if (apiAnswer.error) {
@@ -331,7 +331,14 @@ window.addEventListener('load', () => {
         Utils.onLoad(async (beamAPI) => {
             let faucet = new Faucet();
             if (Utils.isMobile()) {
-                beamAPI.callWalletApiResult(faucet.onApiResult);
+                if(Utils.isAndroid()) {
+                    Utils.onCallWalletApiResult((json) => {
+                        faucet.onApiResult(json.detail)
+                    });
+                }
+                else {
+                    beamAPI.callWalletApiResult(faucet.onApiResult);
+                }
             }
             else {
                 beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
