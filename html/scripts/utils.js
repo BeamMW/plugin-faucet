@@ -2,8 +2,55 @@ const MIN_AMOUNT = 0.00000001;
 const MAX_AMOUNT = 254000000;
 
 export default class Utils {
+    static BEAM = null;
+
     static reload () {
         window.location.reload();
+    }
+
+    static initApp = (callback, handler) => {
+        if (Utils.isDesktopWallet()) {
+            Utils.onDesktopLoad(async (beamAPI) => {
+                beamAPI.api.callWalletApiResult.connect(handler); 
+                callback();
+            });
+        } else if (Utils.isMobile()) {
+            Utils.onMobileLoad(async (beamAPI) => {
+                if(Utils.isAndroid()) {
+                    Utils.onCallWalletApiResult((json) => {
+                        handler(json.detail);
+                    });
+                }
+                else {
+                    beamAPI.callWalletApiResult(handler);
+                }
+                callback();
+            });
+        } else {
+            let initApiInterval = null;
+            const callbacks = {
+                apiInjected: async () => {
+                    const res = await window.BeamApi.createAppAPI(CONTRACT_ID, 'faucet', handler);
+                    if (res) {
+                        document.getElementById('faucet').style.height = '100%';
+                        document.body.style.color = 'rgb(255, 255, 255)';
+                        document.body.style.backgroundImage = 'linear-gradient(rgba(57, 57, 57, 0.6) -174px, rgba(23, 23, 23, 0.6) 56px, rgba(23, 23, 23, 0.6))';  
+                        document.body.style.backgroundColor = 'rgb(50, 50, 50)';  
+                        callback();
+                    }
+                }
+            };
+            window.addEventListener('message', async (ev) => {
+                if (typeof ev.data === 'string' && callbacks[ev.data] !== undefined) {
+                    clearInterval(initApiInterval);
+                    await callbacks[ev.data]();
+                }
+            }, false);
+        
+            initApiInterval = setInterval(() => {
+                window.postMessage({ type: "create_beam_api", name: "Faucet Dapp" }, window.origin);
+            }, 3000);
+        }
     }
 
     static isMobile = () => {
@@ -24,7 +71,7 @@ export default class Utils {
     //
     // API Exposed by the wallet itself
     //
-    static BEAM = null
+
     
     //for android
     static onCallWalletApiResult(cbak){
