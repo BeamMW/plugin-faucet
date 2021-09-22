@@ -326,6 +326,10 @@ function appStart(faucet) {
 }
 
 const faucet = new Faucet();
-Utils.initApp(() => {
-    appStart(faucet);
-}, faucet.onApiResult);
+Utils.newInit((err) => {
+    // TODO:handle error
+    Utils.initApp(() => {
+        alert('appstart')
+        appStart(faucet);
+    }, faucet.onApiResult);
+})

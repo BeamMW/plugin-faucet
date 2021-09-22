@@ -8,12 +8,76 @@ export default class Utils {
         window.location.reload();
     }
 
+    static isMobile () {
+        const ua = navigator.userAgent;
+        return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua));
+    }
+    
+    static isAndroid () {
+        const ua = navigator.userAgent;
+        return (/android/i.test(ua));
+    }
+
+    static isDesktopWallet () {
+        const ua = navigator.userAgent;
+        return (/QtWebEngine/i.test(ua));
+    }
+
+    static async injectScript(url) {
+        return new Promise((resolve, reject) => {
+            let js = document.createElement('script');
+            js.type = 'text/javascript';
+            js.async = true;
+            js.src = url;
+            js.onload = () => resolve()
+            js.onerror = (err) => reject(err)
+            document.getElementsByTagName('head')[0].appendChild(js);
+        })
+    }
+
+    static async createQTChannel() {
+        return new Promise((resolve, reject) => {
+            new QWebChannel(qt.webChannelTransport, (channel) => {
+                Utils.BEAM = channel.objects.BEAM;
+                Utils.applyStyles(); // TODO: review
+                resolve()
+            })
+        })  
+    }
+
+    static async newInit(callback) {
+        let api = undefined
+        
+        try
+        {
+            if (Utils.isDesktopWallet()) {
+                await Utils.injectScript("qrc:///qtwebchannel/qwebchannel.js")
+                await Utils.createQTChannel()
+                api = Utils.BEAM
+            }
+        }
+        catch (err)
+        {
+            return callback(err)
+        }
+
+        return callback(api)
+    }
+
+    //
+    //
+    //  NOT REFACTORED
+    //
+    //
+
+
+    
+
+
     static initApp = (callback, handler) => {
         if (Utils.isDesktopWallet()) {
-            Utils.onDesktopLoad(async (beamAPI) => {
-                beamAPI.api.callWalletApiResult.connect(handler); 
-                callback();
-            });
+            Utils.BEAM.api.callWalletApiResult.connect(handler); 
+            callback();
         } else if (Utils.isMobile()) {
             Utils.onMobileLoad(async (beamAPI) => {
                 if(Utils.isAndroid()) {
@@ -53,20 +117,7 @@ export default class Utils {
         }
     }
 
-    static isMobile = () => {
-        const ua = navigator.userAgent;
-        return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua));
-    }
     
-    static isAndroid = () => {
-        const ua = navigator.userAgent;
-        return (/android/i.test(ua));
-    }
-
-    static isDesktopWallet = () => {
-        const ua = navigator.userAgent;
-        return (/QtWebEngine/i.test(ua));
-    }
     
     //
     // API Exposed by the wallet itself
@@ -80,16 +131,7 @@ export default class Utils {
         });
     }
     
-    static onDesktopLoad(cback) {
-        window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
-            Utils.BEAM = channel.objects.BEAM;
-            
-            // Make everything beautiful
-            Utils.applyStyles();
-            cback(Utils.BEAM);
-        }));
-    }
-
+    
     static onMobileLoad(cback) {
         Utils.BEAM = window.BEAM;
             
