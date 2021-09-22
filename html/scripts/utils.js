@@ -3,17 +3,22 @@ const MAX_AMOUNT = 254000000;
 
 export default class Utils {
     static reload () {
-        window.location.reload()
+        window.location.reload();
     }
 
     static isMobile = () => {
-        const ua = navigator.userAgent
-        return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua))
+        const ua = navigator.userAgent;
+        return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua));
     }
     
     static isAndroid = () => {
-        const ua = navigator.userAgent
-        return (/android/i.test(ua))
+        const ua = navigator.userAgent;
+        return (/android/i.test(ua));
+    }
+
+    static isDesktopWallet = () => {
+        const ua = navigator.userAgent;
+        return (/QtWebEngine/i.test(ua));
     }
     
     //
@@ -24,54 +29,49 @@ export default class Utils {
     //for android
     static onCallWalletApiResult(cbak){
         document.addEventListener("onCallWalletApiResult", function(e) {
-            cbak(e)
+            cbak(e);
         });
     }
     
-    static onLoad(cback) {
-        
-        if (Utils.isMobile()) {
-            Utils.BEAM = window.BEAM
+    static onDesktopLoad(cback) {
+        window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
+            Utils.BEAM = channel.objects.BEAM;
             
             // Make everything beautiful
-            Utils.applyStyles()
-            
-            cback(Utils.BEAM)
+            Utils.applyStyles();
+            cback(Utils.BEAM);
+        }));
     }
-        else {
-            window.addEventListener('load', () => new QWebChannel(qt.webChannelTransport, (channel) => {
-                Utils.BEAM = channel.objects.BEAM
-                
-                // Make everything beautiful
-                Utils.applyStyles()
-                
-                // Notify application
-                cback(Utils.BEAM)
-            }))
-        }
+
+    static onMobileLoad(cback) {
+        Utils.BEAM = window.BEAM;
+            
+        // Make everything beautiful
+        Utils.applyStyles();
+        cback(Utils.BEAM);
     }
     
     static applyStyles() {
-        let style = Utils.BEAM.style
+        let style = Utils.BEAM.style;
         
-        let topColor =  [style.appsGradientOffset, "px,"].join('')
-        let mainColor = [style.appsGradientTop, "px,"].join('')
+        let topColor =  [style.appsGradientOffset, "px,"].join('');
+        let mainColor = [style.appsGradientTop, "px,"].join('');
 
         if (Utils.isMobile()) {
-            document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />'
+            document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />';
             
-            document.body.classList.add('mobile')
+            document.body.classList.add('mobile');
             
             document.body.style.backgroundImage = [
                                                    "linear-gradient(to bottom,",
                                                    style.background_main_top, topColor,
                                                    style.background_main, mainColor,
                                                    style.background_main
-                                                   ].join(' ')
+                                                   ].join(' ');
         }
         
         
-        document.body.style.color = style.content_main
+        document.body.style.color = style.content_main;
         document.querySelectorAll('.popup').forEach(item => {
             item.style.backgroundImage = `linear-gradient(to bottom,
             ${Utils.hex2rgba(style.background_main_top, 0.6)} ${topColor}
@@ -96,7 +96,7 @@ export default class Utils {
     }
     
     static setText(id, text) {
-        Utils.getById(id).innerText = text
+        Utils.getById(id).innerText = text;
     }
 
     static show(id) {
@@ -107,7 +107,7 @@ export default class Utils {
         this.getById(id).classList.add("hidden");
     }
 
-    static callApi(callid, method, params) {
+    static async callApi(callid, method, params) {
         let request = {
             "jsonrpc": "2.0",
             "id":      callid,
@@ -115,14 +115,14 @@ export default class Utils {
             "params":  params
         }
         
-        if (window.beam !== undefined) {
-            window.beam.callApi(callid, method, params);
+        if (window.BeamApi !== undefined) {
+            await window.BeamApi.callWalletApi(callid, method, params);
         } else {
             if (Utils.isMobile()) {
-                Utils.BEAM.callWalletApi(JSON.stringify(request))
+                Utils.BEAM.callWalletApi(JSON.stringify(request));
             }
             else {
-                Utils.BEAM.api.callWalletApi(JSON.stringify(request))
+                Utils.BEAM.api.callWalletApi(JSON.stringify(request));
             }
         }
     }
@@ -132,24 +132,24 @@ export default class Utils {
         xhr.onreadystatechange = function() {
             if(xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    let buffer    = xhr.response
+                    let buffer    = xhr.response;
                     let byteArray = new Uint8Array(buffer);
-                    let array     = Array.from(byteArray)
+                    let array     = Array.from(byteArray);
 
                     if (!array || !array.length) {
-                        return cback("empty shader")
+                        return cback("empty shader");
                     }
                 
-                    return cback(null, array)
+                    return cback(null, array);
                 } else {
-                    let errMsg = ["code", xhr.status].join(" ")
-                    return cback(errMsg)
+                    let errMsg = ["code", xhr.status].join(" ");
+                    return cback(errMsg);
                 }
             }
         }
-        xhr.open('GET', url, true)
+        xhr.open('GET', url, true);
         xhr.responseType = "arraybuffer";
-        xhr.send(null)
+        xhr.send(null);
     }
 
     static handleString(next) {
@@ -168,4 +168,12 @@ export default class Utils {
         }
         return result;
     }
+
+
+    // static handleString(next) {
+    //     const REG_AMOUNT = /^(?:[1-9]\d*|0)?(?:\.(\d+)?)?$/;
+    //     if (REG_AMOUNT.test(next)) {
+    //         return false;
+    //     }
+    // }
 }

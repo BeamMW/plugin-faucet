@@ -326,33 +326,49 @@ function appStart(faucet) {
     });
 }
 
-if (window.beam !== undefined) {
-    let faucet = new Faucet();
-    window.beam.initializeShader(CONTRACT_ID, 'faucet');
-    window.beam.apiResult$.subscribe(faucet.onApiResult);
-    document.getElementById('faucet').style.height = '100%';
-    document.body.style.color = 'rgb(255, 255, 255)';
-    document.body.style.backgroundImage = 'linear-gradient(rgba(57, 57, 57, 0.6) -174px, rgba(23, 23, 23, 0.6) 56px, rgba(23, 23, 23, 0.6))';
-    document.body.style.backgroundColor = 'rgb(50, 50, 50)';
-    
-    appStart(faucet);
-} else {
-    Utils.onLoad(async (beamAPI) => {
-        let faucet = new Faucet();
-        if (Utils.isMobile()) {
-            if(Utils.isAndroid()) {
-                Utils.onCallWalletApiResult((json) => {
-                    faucet.onApiResult(json.detail)
-                });
-            }
-            else {
-                beamAPI.callWalletApiResult(faucet.onApiResult);
-            }
+
+
+const faucet = new Faucet();
+if (Utils.isDesktopWallet()) {
+    Utils.onDesktopLoad(async (beamAPI) => {
+        beamAPI.api.callWalletApiResult.connect(faucet.onApiResult); 
+        appStart(faucet);
+    });
+} else if (Utils.isMobile()) {
+    Utils.onMobileLoad(async (beamAPI) => {
+        if(Utils.isAndroid()) {
+            Utils.onCallWalletApiResult((json) => {
+                faucet.onApiResult(json.detail)
+            });
         }
         else {
-            beamAPI.api.callWalletApiResult.connect(faucet.onApiResult);
+            beamAPI.callWalletApiResult(faucet.onApiResult);
         }
         appStart(faucet);
     });
-} 
+} else {
+    let initApiInterval = null;
+    const callbacks = {
+        apiInjected: async () => {
+            let faucet = new Faucet();
+            const res = await window.BeamApi.createAppAPI(CONTRACT_ID, 'faucet', faucet.onApiResult);
+            if (res) {
+                document.getElementById('faucet').style.height = '100%';
+                document.body.style.color = 'rgb(255, 255, 255)';
+                document.body.style.backgroundImage = 'linear-gradient(rgba(57, 57, 57, 0.6) -174px, rgba(23, 23, 23, 0.6) 56px, rgba(23, 23, 23, 0.6))';  
+                document.body.style.backgroundColor = 'rgb(50, 50, 50)';  
+                appStart(faucet);
+            }
+        }
+    };
+    window.addEventListener('message', async (ev) => {
+        if (typeof ev.data === 'string' && callbacks[ev.data] !== undefined) {
+            clearInterval(initApiInterval);
+            await callbacks[ev.data]();
+        }
+    }, false);
 
+    initApiInterval = setInterval(() => {
+        window.postMessage({ type: "create_beam_api", name: "Faucet Dapp" }, window.origin);
+    }, 3000);
+}

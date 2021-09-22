@@ -116,6 +116,24 @@
         </div>
     </body>
     <script src='./scripts/big.js'></script>
-    <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js" async></script>
+    <script>
+        (function(d, s, id){
+            let js, fjs = d.getElementsByTagName(s)[0];
+            const ua = navigator.userAgent;
+            if (d.getElementById(id) || !(/QtWebEngine/i.test(ua))) {
+                return; 
+            }
+            js = d.createElement(s);
+            js.type = 'text/javascript';
+            js.async = true;
+            js.id = id;
+            js.onload = function(){
+                // remote script has loaded
+            };
+            js.src = "qrc:///qtwebchannel/qwebchannel.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'qwebchannel'));
+    </script>
+    <script type="text/javascript" src="" async></script>
     <script type="module" async src="./scripts/index.js"></script>
 </html>
