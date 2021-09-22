@@ -30,8 +30,6 @@ body {
 .container {
     display: flex;
     flex-direction: column;
-    margin: 25vh auto;
-    width: 90%;
 }
 
 .error-container {
@@ -372,4 +370,8 @@ body {
 
 body.mobile {
     margin: 3% !important;
+}
+
+body.web {
+    padding: 5% 5% 0 5%;
 }

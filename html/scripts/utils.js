@@ -1,13 +1,8 @@
 const MIN_AMOUNT = 0.00000001;
 const MAX_AMOUNT = 254000000;
+let BEAM = null;
 
 export default class Utils {
-    static BEAM = null;
-
-    static reload () {
-        window.location.reload();
-    }
-
     static isMobile () {
         const ua = navigator.userAgent;
         return (/android/i.test(ua) || /iPad|iPhone|iPod/.test(ua));
@@ -18,139 +13,128 @@ export default class Utils {
         return (/android/i.test(ua));
     }
 
-    static isDesktopWallet () {
+    static isDesktop () {
         const ua = navigator.userAgent;
         return (/QtWebEngine/i.test(ua));
     }
 
-    static async injectScript(url) {
-        return new Promise((resolve, reject) => {
-            let js = document.createElement('script');
-            js.type = 'text/javascript';
-            js.async = true;
-            js.src = url;
-            js.onload = () => resolve()
-            js.onerror = (err) => reject(err)
-            document.getElementsByTagName('head')[0].appendChild(js);
-        })
+    static isWeb () {
+        return !Utils.isDesktop() && !Utils.isMobile()
     }
 
-    static async createQTChannel() {
-        return new Promise((resolve, reject) => {
+    static async createDesktopAPI(cid, apirescback) {
+        return new Promise(async (resolve, reject) => {
+            await Utils.injectScript("qrc:///qtwebchannel/qwebchannel.js")
             new QWebChannel(qt.webChannelTransport, (channel) => {
-                Utils.BEAM = channel.objects.BEAM;
-                Utils.applyStyles(); // TODO: review
-                resolve()
+                channel.objects.BEAM.api.callWalletApiResult.connect(apirescback)
+                resolve(channel.objects.BEAM)
             })
         })  
     }
 
-    static async newInit(callback) {
-        let api = undefined
+    static async createWebAPI(cid, apirescback) {
+        return new Promise((resolve, reject) => {
+            window.addEventListener('message', async (ev) => {
+                if (ev.data === 'apiInjected') {
+                    // TODO: зачем здесь вообще контракт айди в самом васме?
+                    await window.BeamApi.createAppAPI(cid, 'faucet', apirescback);
+                    // TOD: first call bug
+                    resolve(window.BeamApi)
+                }
+            }, false);
+            window.postMessage({type: "create_beam_api", name: "Faucet Dapp"}, window.origin);
+        })
+    }
+
+    static async createMobileAPI(cid, apirescback) {
+        return new Promise((resolve, reject) => {
+            if (Utils.isAndroid()) {
+                document.addEventListener("onCallWalletApiResult", (res) => {
+                    apirescback(res.detail)
+                })
+            }
+            else {
+                window.BEAM.callWalletApiResult(apirescback);
+            }
+            resolve(window.BEAM);
+        })
+    }
+
+    static async callApi(callid, method, params) {
+        let request = {
+            "jsonrpc": "2.0",
+            "id":      callid,
+            "method":  method,
+            "params":  params
+        }
+
+        console.log(JSON.stringify(request))
         
+        if (Utils.isWeb()) {
+            BEAM.callWalletApi(callid, method, params);
+        } 
+
+        if (Utils.isMobile()) {
+            BEAM.callWalletApi(JSON.stringify(request));
+        }
+        
+        if (Utils.isDesktop()) {
+            BEAM.api.callWalletApi(JSON.stringify(request));
+        }
+    }
+
+    static async initialize(initcback, apirescback, cid) {
         try
         {
-            if (Utils.isDesktopWallet()) {
-                await Utils.injectScript("qrc:///qtwebchannel/qwebchannel.js")
-                await Utils.createQTChannel()
-                api = Utils.BEAM
+            if (Utils.isDesktop()) {
+                BEAM = await Utils.createDesktopAPI(cid, apirescback)
+            } 
+            
+            if (Utils.isWeb()) {
+                Utils.showWebLoading()
+                BEAM = await Utils.createWebAPI(cid, apirescback)
+                Utils.hideWebLoading()
             }
+
+            if (Utils.isMobile()) {
+                BEAM = await Utils.createMobileAPI(cid, apirescback)
+            }
+
+            let styles = Utils.getStyles()
+            Utils.applyStyles(styles); 
         }
         catch (err)
         {
-            return callback(err)
+            return initcback(err)
         }
 
-        return callback(api)
+        return initcback(null)
     }
 
-    //
-    //
-    //  NOT REFACTORED
-    //
-    //
+    static getStyles () {
+        if (BEAM && BEAM.style) {
+            // TODO: проборосить стили из мобайла и экстеншена
+            return BEAM.style
+        }
 
-
-    
-
-
-    static initApp = (callback, handler) => {
-        if (Utils.isDesktopWallet()) {
-            Utils.BEAM.api.callWalletApiResult.connect(handler); 
-            callback();
-        } else if (Utils.isMobile()) {
-            Utils.onMobileLoad(async (beamAPI) => {
-                if(Utils.isAndroid()) {
-                    Utils.onCallWalletApiResult((json) => {
-                        handler(json.detail);
-                    });
-                }
-                else {
-                    beamAPI.callWalletApiResult(handler);
-                }
-                callback();
-            });
-        } else {
-            let initApiInterval = null;
-            const callbacks = {
-                apiInjected: async () => {
-                    const res = await window.BeamApi.createAppAPI(CONTRACT_ID, 'faucet', handler);
-                    if (res) {
-                        document.getElementById('faucet').style.height = '100%';
-                        document.body.style.color = 'rgb(255, 255, 255)';
-                        document.body.style.backgroundImage = 'linear-gradient(rgba(57, 57, 57, 0.6) -174px, rgba(23, 23, 23, 0.6) 56px, rgba(23, 23, 23, 0.6))';  
-                        document.body.style.backgroundColor = 'rgb(50, 50, 50)';  
-                        callback();
-                    }
-                }
-            };
-            window.addEventListener('message', async (ev) => {
-                if (typeof ev.data === 'string' && callbacks[ev.data] !== undefined) {
-                    clearInterval(initApiInterval);
-                    await callbacks[ev.data]();
-                }
-            }, false);
-        
-            initApiInterval = setInterval(() => {
-                window.postMessage({ type: "create_beam_api", name: "Faucet Dapp" }, window.origin);
-            }, 3000);
+        return {
+            appsGradientOffset: -174,
+            appsGradientTop: 56,
+            content_main: "#ffffff",
+            background_main_top: "#035b8f",
+            background_main: "#042548",
+            background_popup: "#00446c",
+            validator_error: "#ff625c"
         }
     }
 
-    
-    
-    //
-    // API Exposed by the wallet itself
-    //
-
-    
-    //for android
-    static onCallWalletApiResult(cbak){
-        document.addEventListener("onCallWalletApiResult", function(e) {
-            cbak(e);
-        });
-    }
-    
-    
-    static onMobileLoad(cback) {
-        Utils.BEAM = window.BEAM;
-            
-        // Make everything beautiful
-        Utils.applyStyles();
-        cback(Utils.BEAM);
-    }
-    
-    static applyStyles() {
-        let style = Utils.BEAM.style;
-        
+    static applyStyles(style) {
+        // TODO: как-то это все неправильно тут
         let topColor =  [style.appsGradientOffset, "px,"].join('');
         let mainColor = [style.appsGradientTop, "px,"].join('');
 
-        if (Utils.isMobile()) {
+        if (!Utils.isDesktop()) {
             document.head.innerHTML += '<meta name="viewport" content="width=device-width, initial-scale=1" />';
-            
-            document.body.classList.add('mobile');
-            
             document.body.style.backgroundImage = [
                                                    "linear-gradient(to bottom,",
                                                    style.background_main_top, topColor,
@@ -158,7 +142,14 @@ export default class Utils {
                                                    style.background_main
                                                    ].join(' ');
         }
-        
+
+        if (Utils.isMobile()) {
+            document.body.classList.add('mobile');
+        }
+
+        if (Utils.isWeb()) {
+            document.body.classList.add('web');
+        }
         
         document.body.style.color = style.content_main;
         document.querySelectorAll('.popup').forEach(item => {
@@ -173,6 +164,25 @@ export default class Utils {
         });
         document.getElementById('error-full').style.color = style.validator_error;
         document.getElementById('error-common').style.color = style.validator_error;
+    }
+    
+    //
+    // Convenience functions
+    //
+    static reload () {
+        window.location.reload();
+    }
+    
+    static async injectScript(url) {
+        return new Promise((resolve, reject) => {
+            let js = document.createElement('script');
+            js.type = 'text/javascript';
+            js.async = true;
+            js.src = url;
+            js.onload = () => resolve()
+            js.onerror = (err) => reject(err)
+            document.getElementsByTagName('head')[0].appendChild(js);
+        })
     }
 
     static hex2rgba = (hex, alpha = 1) => {
@@ -189,31 +199,11 @@ export default class Utils {
     }
 
     static show(id) {
-        this.getById(id).classList.remove("hidden");
+        Utils.getById(id).classList.remove("hidden");
     }
     
     static hide(id) {
-        this.getById(id).classList.add("hidden");
-    }
-
-    static async callApi(callid, method, params) {
-        let request = {
-            "jsonrpc": "2.0",
-            "id":      callid,
-            "method":  method,
-            "params":  params
-        }
-        
-        if (window.BeamApi !== undefined) {
-            await window.BeamApi.callWalletApi(callid, method, params);
-        } else {
-            if (Utils.isMobile()) {
-                Utils.BEAM.callWalletApi(JSON.stringify(request));
-            }
-            else {
-                Utils.BEAM.api.callWalletApi(JSON.stringify(request));
-            }
-        }
+        Utils.getById(id).classList.add("hidden");
     }
 
     static download(url, cback) {
@@ -258,11 +248,18 @@ export default class Utils {
         return result;
     }
 
-
     // static handleString(next) {
     //     const REG_AMOUNT = /^(?:[1-9]\d*|0)?(?:\.(\d+)?)?$/;
     //     if (REG_AMOUNT.test(next)) {
     //         return false;
     //     }
     // }
+
+    static showWebLoading() {
+        let styles = Utils.getStyles()
+        Utils.applyStyles(styles); 
+    }
+
+    static hideWebLoading() {
+    }
 }

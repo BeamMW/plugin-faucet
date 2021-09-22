@@ -326,10 +326,17 @@ function appStart(faucet) {
 }
 
 const faucet = new Faucet();
-Utils.newInit((err) => {
-    // TODO:handle error
-    Utils.initApp(() => {
-        alert('appstart')
-        appStart(faucet);
-    }, faucet.onApiResult);
-})
+Utils.initialize((err) => {
+    if (err) {
+        // TODO:handle error
+        alert('INIT ERROR: ' + err)
+        return
+    }
+    
+    if (Utils.isWeb()) {
+        document.getElementById('faucet').style.height = '100%';
+    }
+
+    appStart(faucet)
+    // TODO: why we pass CID here at all?
+}, faucet.onApiResult, CONTRACT_ID)
