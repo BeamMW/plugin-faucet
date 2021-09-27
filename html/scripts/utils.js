@@ -268,8 +268,52 @@ export default class Utils {
     static showWebLoading() {
         let styles = Utils.getStyles()
         Utils.applyStyles(styles); 
+
+        let bg = document.createElement("div");
+        bg.style.width = "100%";
+        bg.style.height = "100%";
+        let loadContainer = document.createElement("div");
+        loadContainer.className = "dapp-loading";
+        loadContainer.id = "dapp-loader";
+
+        loadContainer.style.textAlign = 'center';
+        loadContainer.style.margin = '50px auto 0 auto';
+        loadContainer.style.width = '585px';
+        loadContainer.style.padding = '5%';
+        loadContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+        loadContainer.style.borderRadius = '10px';
+
+        let titleElem = document.createElement("h3");
+        titleElem.innerText = "Connecting to the BEAM Web Wallet."; 
+        let subtitle = document.createElement("p");
+        subtitle.innerText = "To use BEAM Faucet you should have BEAM Web Wallet installed and allow connection.";
+
+        let reconnectButton = document.createElement("button");
+        reconnectButton.innerText = "Try to connect again";
+        reconnectButton.addEventListener('click', () => {
+            Utils.reload();
+        });
+        let installButton = document.createElement("button");
+        installButton.innerText = "Install BEAM Web Wallet";
+
+        installButton.style.marginLeft = '30px';
+        
+        let controlsArea = document.createElement("div");
+        
+        loadContainer.appendChild(titleElem);
+        loadContainer.appendChild(subtitle);
+        loadContainer.appendChild(controlsArea);
+
+        controlsArea.appendChild(reconnectButton);
+        controlsArea.appendChild(installButton);
+
+        bg.appendChild(loadContainer);
+
+        document.body.appendChild(bg)
     }
 
     static hideWebLoading() {
+        const elem = document.getElementById("dapp-loader");
+        elem.parentNode.removeChild(elem);
     }
 }
