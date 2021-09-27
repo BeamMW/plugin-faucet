@@ -326,17 +326,21 @@ function appStart(faucet) {
 }
 
 const faucet = new Faucet();
-Utils.initialize((err) => {
-    if (err) {
-        // TODO:handle error
-        alert('INIT ERROR: ' + err)
-        return
-    }
-    
-    if (Utils.isWeb()) {
-        document.getElementById('faucet').style.height = '100%';
-    }
+Utils.initialize({
+        "appname": "BEAM Faucet",
+        "apiResultHandler": faucet.onApiResult,
+    },
+    (err) => {
+        if (err) {
+            // TODO:handle error
+            alert('INIT ERROR: ' + err)
+            return
+        }
+        
+        if (Utils.isWeb()) {
+            document.getElementById('faucet').style.height = '100%';
+        }
 
-    appStart(faucet)
-    // TODO: why we pass CID here at all?
-}, faucet.onApiResult, CONTRACT_ID)
+        appStart(faucet)
+    }
+)

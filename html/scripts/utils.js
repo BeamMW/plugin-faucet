@@ -32,17 +32,18 @@ export default class Utils {
         })  
     }
 
-    static async createWebAPI(cid, apirescback) {
+    static async createWebAPI(apiver, minapiver, appname, apirescback) {
         return new Promise((resolve, reject) => {
             window.addEventListener('message', async (ev) => {
                 if (ev.data === 'apiInjected') {
                     // TODO: зачем здесь вообще контракт айди в самом васме?
-                    await window.BeamApi.createAppAPI(cid, 'faucet', apirescback);
+                    // TODO: remove window.BeamApi
+                    await window.BeamApi.createAppAPI(apiver, minapiver, appname, apirescback);
                     // TOD: first call bug
                     resolve(window.BeamApi)
                 }
             }, false);
-            window.postMessage({type: "create_beam_api", name: "Faucet Dapp"}, window.origin);
+            window.postMessage({type: "create_beam_api", apiver, minapiver, appname}, window.origin);
         })
     }
 
@@ -83,21 +84,25 @@ export default class Utils {
         }
     }
 
-    static async initialize(initcback, apirescback, cid) {
+    static async initialize(params, initcback) {
+        let apirescb = params["apiResultHandler"]
         try
         {
             if (Utils.isDesktop()) {
-                BEAM = await Utils.createDesktopAPI(cid, apirescback)
+                BEAM = await Utils.createDesktopAPI(apirescb)
             } 
             
             if (Utils.isWeb()) {
                 Utils.showWebLoading()
-                BEAM = await Utils.createWebAPI(cid, apirescback)
+                let apiver = params["api_version"] || "current"
+                let minapiver = params["min_api_version"] || ""
+                let appname = params["appname"]
+                BEAM = await Utils.createWebAPI(apiver, minapiver, appname, apirescb)
                 Utils.hideWebLoading()
             }
 
             if (Utils.isMobile()) {
-                BEAM = await Utils.createMobileAPI(cid, apirescback)
+                BEAM = await Utils.createMobileAPI(apirescb)
             }
 
             let styles = Utils.getStyles()
@@ -162,8 +167,13 @@ export default class Utils {
         document.querySelectorAll('.popup__content').forEach(item => {
             item.style.backgroundColor = Utils.hex2rgba(style.background_popup, 1);
         });
-        document.getElementById('error-full').style.color = style.validator_error;
-        document.getElementById('error-common').style.color = style.validator_error;
+
+
+        let ef = document.getElementById('error-full');
+        if (ef) ef.style.color = style.validator_error;
+        
+        let ec = document.getElementById('error-common');
+        if (ec) ec.style.color = style.validator_error;
     }
     
     //
