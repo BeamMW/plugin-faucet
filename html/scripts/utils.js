@@ -22,7 +22,7 @@ export default class Utils {
         return !Utils.isDesktop() && !Utils.isMobile()
     }
 
-    static async createDesktopAPI(cid, apirescback) {
+    static async createDesktopAPI(apirescback) {
         return new Promise(async (resolve, reject) => {
             await Utils.injectScript("qrc:///qtwebchannel/qwebchannel.js")
             new QWebChannel(qt.webChannelTransport, (channel) => {
@@ -44,7 +44,7 @@ export default class Utils {
         })
     }
 
-    static async createMobileAPI(cid, apirescback) {
+    static async createMobileAPI(apirescback) {
         return new Promise((resolve, reject) => {
             if (Utils.isAndroid()) {
                 document.addEventListener("onCallWalletApiResult", (res) => {
