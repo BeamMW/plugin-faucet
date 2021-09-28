@@ -36,7 +36,10 @@ export default class Utils {
         return new Promise((resolve, reject) => {
             window.addEventListener('message', async (ev) => {
                 if (ev.data === 'apiInjected') {
-                    await window.BeamApi.createAppAPI(apirescback);
+                    // TODO: зачем здесь вообще контракт айди в самом васме?
+                    // TODO: remove window.BeamApi
+                    await window.BeamApi.createAppAPI(apiver, minapiver, appname, apirescback);
+                    // TOD: first call bug
                     resolve(window.BeamApi)
                 }
             }, false);
