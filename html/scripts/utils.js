@@ -32,18 +32,15 @@ export default class Utils {
         })  
     }
 
-    static async createWebAPI(apiver, minapiver, appname, apirescback) {
+    static async createWebAPI(apiver, apivermin, appname, apirescback) {
         return new Promise((resolve, reject) => {
             window.addEventListener('message', async (ev) => {
                 if (ev.data === 'apiInjected') {
-                    // TODO: зачем здесь вообще контракт айди в самом васме?
-                    // TODO: remove window.BeamApi
-                    await window.BeamApi.createAppAPI(apiver, minapiver, appname, apirescback);
-                    // TOD: first call bug
+                    await window.BeamApi.callWalletApiResult(apirescback);
                     resolve(window.BeamApi)
                 }
             }, false);
-            window.postMessage({type: "create_beam_api", apiver, minapiver, appname}, window.origin);
+            window.postMessage({type: "create_beam_api", apiver, apivermin, appname}, window.origin);
         })
     }
 
@@ -94,10 +91,10 @@ export default class Utils {
             
             if (Utils.isWeb()) {
                 Utils.showWebLoading()
-                let apiver = params["api_version"] || "current"
-                let minapiver = params["min_api_version"] || ""
-                let appname = params["appname"]
-                BEAM = await Utils.createWebAPI(apiver, minapiver, appname, apirescb)
+                let apiver    = params["api_version"] || "current"
+                let apivermin = params["min_api_version"] || ""
+                let appname   = params["appname"]
+                BEAM = await Utils.createWebAPI(apiver, apivermin, appname, apirescb)
                 Utils.hideWebLoading()
             }
 
@@ -284,7 +281,7 @@ export default class Utils {
         loadContainer.style.borderRadius = '10px';
 
         let titleElem = document.createElement("h3");
-        titleElem.innerText = "Connecting to the BEAM Web Wallet."; 
+        titleElem.innerText = "Connecting to BEAM Web Wallet."; 
         let subtitle = document.createElement("p");
         subtitle.innerText = "To use BEAM Faucet you should have BEAM Web Wallet installed and allow connection.";
 
