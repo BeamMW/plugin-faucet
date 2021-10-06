@@ -145,8 +145,14 @@ class Faucet {
                     create_tx: false,
                     args: ["role=manager,action=view_params,cid=", this.pluginData.contractId].join('')
                 })
+
+                Utils.callApi("tx_asset_info", "tx_asset_info", {asset_id: 3});
     
                 return 
+            }
+
+            if (apiCallId === "tx_asset_info") {
+                console.log('tx_asset_info^^^',apiAnswer)
             }
     
             if (apiCallId == "manager-params") {
