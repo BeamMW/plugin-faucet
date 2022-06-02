@@ -191,7 +191,7 @@ const EpochesBase: React.FC = () => {
                 }}
                 disabled={isBlocked}
                 pallete='blue' icon={IconWithdrawBlue} >
-                  get your first beam{activeAsset === 0 ? '' : 'x'}s
+                  get your first beam{activeAsset === 0 ? '' : 'x'}
               </Button>
             </StyledContainer>
             }
