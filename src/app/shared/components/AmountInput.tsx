@@ -96,7 +96,7 @@ const AmountInput: React.FC<AmountInputProps> = ({
           className={containerStyle}
           onInput={handleInput}
         />
-        {!error && <Rate value={parseFloat(value)} className={rateStyle} />}
+        {!error && activeAsset === 0 && <Rate value={parseFloat(value)} className={rateStyle} />}
       </div>
       <Select value={activeAsset} className={selectClassName} onSelect={handleSelect}>
         {assets.map(({ getIcon, id, title }) => (
