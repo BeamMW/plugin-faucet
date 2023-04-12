@@ -664,10 +664,10 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[2].use[1]!./node_modules/@linaria/webpack5-loader/lib/outputCssLoader.js!./src/app/shared/components/Select.tsx ***!
   \***********************************************************************************************************************************************************************************/
 .c66ez3b{display:inline-block;position:relative;margin-left:10px;}
-.s4rt7u{position:absolute;top:100%;right:0;z-index:1;margin-top:8px;padding:10px 0;border-radius:10px;background-color:#00446C;}
-.o1z5g03{padding:10px 20px;cursor:pointer;text-align:left;white-space:nowrap;}.o1z5g03:hover,.o1z5g03:active{background-color:rgba(255,255,255,0.07);}
+.s4rt7u{position:absolute;top:100%;right:0;z-index:1;margin-top:8px;padding:10px 0;border-radius:10px;background-color:#00446C;max-height:300px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;width:300px;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow:scroll;}
+.o1z5g03{padding:10px 20px;cursor:pointer;text-align:left;white-space:nowrap;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;}.o1z5g03:hover,.o1z5g03:active{background-color:rgba(255,255,255,0.07);}
 .o1srhdsh.o1z5g03{cursor:default;color:var(--color-green);}.o1srhdsh.o1z5g03:hover,.o1srhdsh.o1z5g03:active{background-color:transparent;}
-.b1segg38{line-height:18px;cursor:var(--b1segg38-0);padding:0;border:none;background-color:transparent;-webkit-text-decoration:none;text-decoration:none;color:white;white-space:nowrap;}.b1segg38:hover,.b1segg38:active{background-color:transparent;}
+.b1segg38{line-height:18px;cursor:var(--b1segg38-0);padding:0;border:none;background-color:transparent;-webkit-text-decoration:none;text-decoration:none;color:white;white-space:nowrap;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;}.b1segg38:hover,.b1segg38:active{background-color:transparent;}
 .a10kemvm{display:inline-block;vertical-align:super;margin-left:8px;}
 
 /*!*********************************************************************************************************************************************************************************!*\
@@ -682,7 +682,7 @@
 .c1imekuk{position:relative;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;margin-bottom:20px;}.c1imekuk > .input-area{width:80%;}
 .c1d3kd85{-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
 .rdj8zs9{font-size:12px;-webkit-align-self:start;-ms-flex-item-align:start;align-self:start;margin-left:15px;text-align:start;}
-.l56amwz{display:inline-block;vertical-align:bottom;line-height:26px;margin-left:8px;}
+.l56amwz{display:inline-block;vertical-align:bottom;line-height:26px;margin:0 5px 0 10px;max-width:150px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;}
 
 /*!***********************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[2].use[1]!./node_modules/@linaria/webpack5-loader/lib/outputCssLoader.js!./src/app/shared/components/Toggle.tsx ***!
@@ -706,6 +706,11 @@
 .a1ajtg26{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-align:row;-ms-flex-align:row;flex-align:row;}.a1ajtg26 > .amount-input-class{width:340px !important;}.a1ajtg26 > .amount-max-class{margin-top:14px;margin-left:17px;font-weight:bold;font-size:14px;color:#0BCCF7;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}
 .wv01qzb{width:450px !important;}
 
+/*!**************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[2].use[1]!./node_modules/@linaria/webpack5-loader/lib/outputCssLoader.js!./src/app/shared/components/AssetIcon.tsx ***!
+  \**************************************************************************************************************************************************************************************/
+.cjq1ywe{display:inline-block;vertical-align:middle;width:26px;height:26px;margin-right:10px;top:50%;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%);color:var(--cjq1ywe-0);}.cjq1ywe.without-transform{-webkit-transform:none;-ms-transform:none;transform:none;}
+
 /*!***************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[2].use[1]!./node_modules/@linaria/webpack5-loader/lib/outputCssLoader.js!./src/app/containers/Main/containers/Faucet/Faucet.tsx ***!
   \***************************************************************************************************************************************************************************************************/
@@ -716,7 +721,7 @@
 .d1e3bivb{max-width:220px !important;}
 .g1sil1qn{margin-top:20px !important;}
 .s1guihbs{-webkit-align-self:flex-start;-ms-flex-item-align:start;align-self:flex-start;margin:10px auto 0;}
-.lfvh9ms{display:inline-block;vertical-align:bottom;line-height:26px;margin-left:10px;}
+.lfvh9ms{display:inline-block;vertical-align:bottom;line-height:26px;margin:0 5px 0 10px;max-width:150px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;}
 
 /*!****************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[2].use[1]!./node_modules/@linaria/webpack5-loader/lib/outputCssLoader.js!./src/app/styles.ts ***!
