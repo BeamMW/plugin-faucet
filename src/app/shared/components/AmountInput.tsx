@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
-
-import { truncate } from '@core/utils';
-
 import { useSelector } from 'react-redux';
-import { IconBeam, IconBeamX } from '@app/shared/icons';
+import { AssetIcon } from '@app/shared/components';
 import Input from './Input';
 import Select, { Option } from '@app/shared/components/Select';
 import Rate from './Rate';
+import { selectDepositAssetsList } from '@app/containers/Main/store/selectors';
 
 export const AMOUNT_MAX = 253999999.9999999;
 
@@ -53,19 +51,19 @@ const LabelStyled = styled.div`
   display: inline-block;
   vertical-align: bottom;
   line-height: 26px;
-  margin-left: 8px;
+  margin: 0 5px 0 10px;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 const AmountInput: React.FC<AmountInputProps> = ({
   value, error, pallete = 'purple', onChange, from, valid,
 }) => {
-  const assets = [
-    {id: 0, asset_id: 0, title: 'BEAM', getIcon: ()=>{return <IconBeam/>}},
-    {id: 1, asset_id: 31, title: 'BEAMX', getIcon: ()=>{return <IconBeamX/>}}
-  ]
-
+  const assetsList = useSelector(selectDepositAssetsList());
   const [rawData, setRawData] = useState('');
-  const [activeAsset, setAsset] = useState(assets[0].id);
+  const [activeAsset, setAsset] = useState(0);
 
   const handleInput: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const { value: raw } = event.target;
@@ -74,12 +72,12 @@ const AmountInput: React.FC<AmountInputProps> = ({
       return;
     }
     setRawData(raw);
-    onChange(raw, assets[activeAsset].asset_id);
+    onChange(raw, assetsList[activeAsset].aid);
   };
 
   const handleSelect = (next) => {
     setAsset(next);
-    onChange(rawData, assets[next].asset_id);
+    onChange(rawData, assetsList[next].aid);
   };
 
   return (
@@ -99,10 +97,11 @@ const AmountInput: React.FC<AmountInputProps> = ({
         {!error && activeAsset === 0 && <Rate value={parseFloat(value)} className={rateStyle} />}
       </div>
       <Select value={activeAsset} className={selectClassName} onSelect={handleSelect}>
-        {assets.map(({ getIcon, id, title }) => (
-          <Option key={id} value={id}>
-            {getIcon()}
-            <LabelStyled>{title}</LabelStyled>
+        {assetsList.map((asset, index) => (
+          <Option key={index} value={index}>
+            <AssetIcon asset_id={asset.aid} className="without-transform" />
+            <LabelStyled>{asset.parsedMetadata['N']}</LabelStyled>
+            <span>(id:{asset.aid})</span>
           </Option>
         ))}
       </Select>

@@ -1,7 +1,7 @@
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { navigate } from '@app/shared/store/actions';
 import { ROUTES, } from '@app/shared/constants';
-import { LoadViewParams, LoadViewFunds } from '@core/api';
+import { LoadViewParams, LoadViewFunds, LoadAllAssets } from '@core/api';
 import { selectTransactions } from '@app/shared/store/selectors';
 
 import { actions } from '.';
@@ -16,41 +16,70 @@ const FETCH_INTERVAL = 310000;
 const API_URL = 'https://api.coingecko.com/api/v3/simple/price';
 const RATE_PARAMS = 'ids=beam&vs_currencies=usd';
 
+function parseMetadata(metadata) {
+  const splittedMetadata = metadata.split(';');
+  splittedMetadata.shift();
+  const obj = splittedMetadata.reduce((accumulator, value, index) => {
+    const data = value.split(/=(.*)/s);
+    return {...accumulator, [data[0]]: data[1]};
+  }, {});
+  return obj;
+}
+
 export function* loadParamsSaga(
     action: ReturnType<typeof actions.loadAppParams.request>,
   ): Generator {
     try {
-        const result = (yield call(LoadViewParams, action.payload ? action.payload : null)) as FaucetAppParams;
-        yield put(actions.loadAppParams.success(result));
-
-
-        const funds = (yield call(LoadViewFunds)) as FaucetFund[];
-        yield put(actions.setFaucetFunds(funds));
-
-        console.log(funds);
-
-        const isLoaded = yield select(selectIsLoaded());
-        if (!isLoaded) {
-          store.dispatch(setIsLoaded(true));
-          yield put(navigate(ROUTES.MAIN.FAUCET));
+      const beamCoin = {
+        aid: 0,
+        metadata: '',
+        parsedMetadata: {
+          N: 'Beam'
         }
+      };
+      const result = (yield call(LoadViewParams, action.payload ? action.payload : null)) as FaucetAppParams;
+      yield put(actions.loadAppParams.success(result));
 
-        const trs = (yield select(selectTransactions())) as Transaction[];
+      const assetsList = (yield call(LoadAllAssets)) as any;
+      const fundsInContract = (yield call(LoadViewFunds)) as FaucetFund[];
+      assetsList.forEach(element => {
+        element['parsedMetadata'] = parseMetadata(element.metadata);
+      });
+      assetsList.unshift(beamCoin);
+      yield put(actions.setDepositAssetsList(assetsList))
+      yield put(actions.setFaucetFunds(fundsInContract));
 
-        let donatedBeam = 0;
-        let donatedBeamX = 0;
+      const enabledAssets = [];
+      fundsInContract.map(item => {
+        const asset = assetsList.find(asset => {
+          return asset.aid === item.Aid;
+        })
+        enabledAssets.push(asset);
+      });
+      yield put(actions.setAssetsList(enabledAssets));
 
-        for (var tr of trs) {
-          if (tr.status === 3 && !tr.income) {
-            if (tr.invoke_data[0].amounts[0].asset_id === 0) {
-              donatedBeam += tr.invoke_data[0].amounts[0].amount;
-            } else if (tr.invoke_data[0].amounts[0].asset_id === 31) {
-              donatedBeamX += tr.invoke_data[0].amounts[0].amount;
-            }
+      const isLoaded = yield select(selectIsLoaded());
+      if (!isLoaded) {
+        store.dispatch(setIsLoaded(true));
+        yield put(navigate(ROUTES.MAIN.FAUCET));
+      }
+
+      const trs = (yield select(selectTransactions())) as Transaction[];
+
+      let donatedBeam = 0;
+      let donatedBeamX = 0;
+
+      for (var tr of trs) {
+        if (tr.status === 3 && !tr.income) {
+          if (tr.invoke_data[0].amounts[0].asset_id === 0) {
+            donatedBeam += tr.invoke_data[0].amounts[0].amount;
+          } else if (tr.invoke_data[0].amounts[0].asset_id === 7) {
+            donatedBeamX += tr.invoke_data[0].amounts[0].amount;
           }
         }
-        yield put(actions.setDonatedBeam(donatedBeam));
-        yield put(actions.setDonatedBeamx(donatedBeamX));
+      }
+      yield put(actions.setDonatedBeam(donatedBeam));
+      yield put(actions.setDonatedBeamx(donatedBeamX));
     } catch (e) {
       yield put(actions.loadAppParams.failure(e));
     }

@@ -7,6 +7,8 @@ export interface FaucetStateType {
     withdraw: boolean;
   };
   rate: number;
+  assetsList: [];
+  depositAssetList: [];
   funds: FaucetFund[];
   isDonateInProgress: boolean;
   donatedBeam: number;

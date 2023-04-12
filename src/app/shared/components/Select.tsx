@@ -21,6 +21,11 @@ const SelectStyled = styled.div`
   padding: 10px 0;
   border-radius: 10px;
   background-color: #00446C;
+  max-height: 300px;
+  display: flex;
+  width: 300px;
+  flex-direction: column;
+  overflow: scroll;
 `;
 
 const OptionStyled = styled.div`
@@ -28,6 +33,8 @@ const OptionStyled = styled.div`
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
 
   &:hover,
   &:active {
@@ -54,6 +61,8 @@ const ButtonStyled = styled.button`
   text-decoration: none;
   color: white;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
 
   &:hover,
   &:active {

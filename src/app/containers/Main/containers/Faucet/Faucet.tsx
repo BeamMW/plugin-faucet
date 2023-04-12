@@ -4,14 +4,26 @@ import { css } from '@linaria/core';
 
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Window, Button } from '@app/shared/components';
-import { selectAppParams, selectRate, selectPopupsState, selectIsInProgress, selectDonatedBeamX, selectDonatedBeam, selectFunds } from '../../store/selectors';
+import { Window, Button, AssetIcon } from '@app/shared/components';
+import {
+  selectAppParams,
+  selectRate,
+  selectPopupsState,
+  selectDonatedBeamX,
+  selectDonatedBeam,
+  selectFunds,
+  selectAssetsList,
+} from '../../store/selectors';
 import { loadRate, setPopupState } from '@app/containers/Main/store/actions';
-import { IconDepositBlue, IconWithdrawBlue, IconBeamWithdraw, 
-  IconBeamDonated, IconFaucetEmpty, IconBeam, IconBeamX } from '@app/shared/icons';
+import {
+  IconDepositBlue,
+  IconWithdrawBlue,
+  IconBeamWithdraw,
+  IconBeamDonated,
+  IconFaucetEmpty
+} from '@app/shared/icons';
 import { UserWithdraw } from '@core/api';
 import { numFormatter, fromGroths } from '@core/appUtils';
-import { PROPOSALS, ROUTES } from '@app/shared/constants';
 import { selectSystemState, selectTransactions } from '@app/shared/store/selectors';
 import Select, { Option } from '@app/shared/components/Select';
 
@@ -109,15 +121,18 @@ const selectClassName = css`
   margin: 10px auto 0;
 `;
 
-const LabelStyled = styled.div`
+const LabelStyled = styled.span`
   display: inline-block;
   vertical-align: bottom;
   line-height: 26px;
-  margin-left: 10px;
+  margin: 0 5px 0 10px;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 const EpochesBase: React.FC = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const rate = useSelector(selectRate());
   const appParams = useSelector(selectAppParams());
@@ -129,11 +144,9 @@ const EpochesBase: React.FC = () => {
   const funds = useSelector(selectFunds());
   const transactions = useSelector(selectTransactions());
   const [isBlocked, setIsBlocked] = useState(false);
-  const assets = [
-    {id: 0, asset_id: 0, title: 'BEAM', getIcon: ()=>{return <IconBeam/>}},
-    {id: 1, asset_id: 31, title: 'BEAMX', getIcon: ()=>{return <IconBeamX/>}}
-  ]
-  const [activeAsset, setAsset] = useState(assets[0].id);
+
+  const assetsList = useSelector(selectAssetsList());
+  const [activeAsset, setAsset] = useState(0);
   const handleSelect = (next) => {
     setAsset(next);
   };
@@ -175,23 +188,24 @@ const EpochesBase: React.FC = () => {
               <IconBeamWithdraw className='icon-inprogress'/>
               <div className='enjoy'>Enjoy trying the Beam Wallet!</div>
             </EnjoyContainer> :
-            <StyledContainer>
+            assetsList.length > 0 && <StyledContainer>
               <div className='title'>See the wallet in action</div>
               <Select value={activeAsset} className={selectClassName} onSelect={handleSelect}>
-                {assets.map(({ getIcon, id, title }) => (
-                  <Option key={id} value={id}>
-                    {getIcon()}
-                    <LabelStyled>{title}</LabelStyled>
+                {assetsList.map((asset, index) => (
+                  <Option key={index} value={index}>
+                    <AssetIcon asset_id={asset.aid} className="without-transform" />
+                    <LabelStyled>{asset.parsedMetadata['N']}</LabelStyled>
+                    <span>(id:{asset.aid})</span>
                   </Option>
                 ))}
               </Select>
               <Button variant="regular" className={getButtonClass}
                 onClick={()=>{
-                  UserWithdraw(appParams.withdrawLimit, assets[activeAsset].asset_id);
+                  UserWithdraw(appParams.withdrawLimit, assetsList[activeAsset].aid);
                 }}
                 disabled={isBlocked}
                 pallete='blue' icon={IconWithdrawBlue} >
-                  get your first beam{activeAsset === 0 ? '' : 'x'}
+                  get
               </Button>
             </StyledContainer>
             }

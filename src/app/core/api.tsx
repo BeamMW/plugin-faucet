@@ -25,6 +25,15 @@ export function LoadViewFunds<T = any>(): Promise<T> {
     });
 }
 
+export function LoadAllAssets<T = any>(): Promise<T> {
+    return new Promise((resolve, reject) => {
+        Utils.invokeContract("role=user,action=view_all_assets,cid="+CID,
+        (error, result, full) => {
+            resolve(result.res)
+        })
+    })
+}
+
 export function UserDeposit<T = any>(amount: number, aid: number): Promise<T> {
     return new Promise((resolve, reject) => {
         Utils.invokeContract("role=user,action=deposit,amount="+ amount +",aid=" + aid + ",cid=" + CID, 
@@ -37,6 +46,7 @@ export function UserDeposit<T = any>(amount: number, aid: number): Promise<T> {
 
 export function UserWithdraw<T = any>(amount: number, aid: number): Promise<T> {
     return new Promise((resolve, reject) => {
+        console.log(aid)
         Utils.invokeContract("role=user,action=withdraw,amount="+ amount +",aid=" + aid + ",cid=" + CID, 
         (error, result, full) => {
             onMakeTx(error, result, full);
@@ -126,7 +136,6 @@ export function VoteProposal<T = any>(votes: number[], id: number, vote: number,
         }
 
         const req = "role=user,action=vote," + votesParams + "voteCounter=" + counter + ",cid=" + CID;
-        console.log('VOTE PROCESS: ', req);
         Utils.invokeContract(req, 
         (error, result, full) => {
             onMakeTx(error, result, full, {id, vote});

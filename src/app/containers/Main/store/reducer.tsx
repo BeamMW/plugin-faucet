@@ -18,6 +18,8 @@ const initialState: FaucetStateType = {
     deposit: false
   },
   funds: [],
+  assetsList: [],
+  depositAssetList: [],
   rate: 0,
   isDonateInProgress: false,
   donatedBeam: 0,
@@ -45,6 +47,12 @@ const reducer = createReducer<FaucetStateType, Action>(initialState)
   }))
   .handleAction(actions.setFaucetFunds, (state, action) => produce(state, (nexState) => {
     nexState.funds = action.payload;
+  }))
+  .handleAction(actions.setAssetsList, (state, action) => produce(state, (nexState) => {
+    nexState.assetsList = action.payload;
+  }))
+  .handleAction(actions.setDepositAssetsList, (state, action) => produce(state, (nexState) => {
+    nexState.depositAssetList = action.payload;
   }));
 
 export { reducer as MainReducer };

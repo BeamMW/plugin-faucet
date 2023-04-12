@@ -11,3 +11,5 @@ export const selectDonatedBeam = () => createSelector(selectMain, (state) => sta
 export const selectDonatedBeamX = () => createSelector(selectMain, (state) => state.donatedBeamX);
 export const selectIsInProgress = () => createSelector(selectMain, (state) => state.isInProgress);
 export const selectFunds = () => createSelector(selectMain, (state) => state.funds);
+export const selectAssetsList = () => createSelector(selectMain, (state) => state.assetsList);
+export const selectDepositAssetsList = () => createSelector(selectMain, (state) => state.depositAssetList);

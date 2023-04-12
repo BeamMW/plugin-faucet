@@ -9,3 +9,4 @@ export { default as Toggle } from './Toggle';
 export { default as DepositPopup } from './DepositPopup';
 export { default as WithdrawPopup } from './WithdrawPopup';
 export { default as Select } from './Select';
+export { default as AssetIcon } from './AssetIcon';

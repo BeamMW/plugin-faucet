@@ -88,10 +88,6 @@ const Window: React.FC<WindowProps> = ({
   const dispatch = useDispatch();
 
   const popupsState = useSelector(selectPopupsState());
-
-  useEffect(()=>{
-    console.log('asdasdasdasdasdasd', popupsState)
-  },[popupsState.deposit])
   
   return (
     <>

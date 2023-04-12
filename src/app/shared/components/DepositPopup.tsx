@@ -66,14 +66,7 @@ const DepositButtonsClass = css`
 `;
 
 const DepositPopup: React.FC<DepositPopupProps> = ({ visible, onCancel }) => {
-  const inputRef = useRef<HTMLInputElement>();
-  const [warned, setWarned] = useState(false);
-  const dispatch = useDispatch();
-  const error = useSelector(selectErrorMessage());
-  const appParams = useSelector(selectAppParams());
-  const [nextEpochDate, setNextEpochStartDate] = useState(null);
   const [aid, setAid] = useState(null);
-  const systemState = useSelector(selectSystemState());
   const formik = useFormik<DepositFormData>({
     initialValues: {
       send_amount: '',

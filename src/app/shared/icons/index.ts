@@ -43,8 +43,9 @@ import IconBeamWithdraw from './beam-withdraw-img.svg';
 import IconBeamDonated from './beam-donated-img.svg';
 import IconFaucetEmpty from './faucet-empty.svg';
 
-import IconBeam from './ic-beam.svg';
+import BeamIcon from './ic-beam.svg';
 import IconBeamX from './ic-beamx.svg';
+import AssetIcon from './icon-asset.svg';
 export {
   IconBack,
   IconReceive,
@@ -91,6 +92,7 @@ export {
   IconBeamDonated,
   IconFaucetEmpty,
 
-  IconBeam,
-  IconBeamX
+  BeamIcon,
+  IconBeamX,
+  AssetIcon
 }
